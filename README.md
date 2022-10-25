@@ -1,0 +1,2 @@
+This code is mainly to detection and segmentation of IAs in T1 sequences. 
+If you think this is useful for you, please cite our paper "A deep learning framework for intracranial aneurysms automatic segmentation and detection on magnetic resonance T1 images"
