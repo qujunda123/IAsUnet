@@ -91,119 +91,7 @@ class Attention(nn.Module):
         out=self.norm(x*att)+self.norm1(x)
         return self.act(out),att
  
-# class model(nn.Module):
-#     def __init__(self,number=32,phase='train'):
-#         super().__init__()
-#         self.phase=phase
-#         self.dropout=nn.FeatureAlphaDropout(p=0.1,inplace=True)
-#         self.conv1=conv_block(1,number)
-#         self.conv2=conv_block(number+1,number*2)
-#         self.conv3=conv_block(number+1+number*2,number*4)
-#         self.conv4=conv_block(number+1+number*2+number*4,number*8)
-#         self.conv5=conv_block(number+1+number*2+number*4+number*8,number*16)
-#         self.up6=up_conv(number+1+number*2+number*4+number*8+number*16,number*8)
-#         self.conv6=conv_block(number*16,number*8)
-#         self.up7=up_conv(number*16+number*8,number*4)
-#         self.conv7=conv_block(number*8,number*4)
-#         self.up8=up_conv(number*8+number*4,number*2)
-#         self.conv8=conv_block(number*4,number*2)
-#         self.up9=up_conv(number*4+number*2,number)
-#         self.conv9=conv_block(number*2,number)
-#         self.maxpool=nn.MaxPool3d(2)
-#         self.featureScale1=featureScale(number*3,int(number/2))
-#         self.featureScale2=featureScale(number*6,int(number/2))
-#         self.featureScale3=featureScale(number*12,int(number/2))
-#         self.featureScale4=featureScale(number*24,int(number/2))
-#         self.conv1x1=nn.Conv3d(int(number/2),1, kernel_size=1)
-#         self.conv1x2=nn.Conv3d(int(number/2), 1, kernel_size=1)
-#         self.conv1x3=nn.Conv3d(int(number/2), 1, kernel_size=1)
-#         self.conv1x4=nn.Conv3d(int(number/2), 1, kernel_size=1)
-#         self.mix1=Attention(int(number/2),int(number/2))
-#         self.mix2=Attention(int(number/2),int(number/2))
-#         self.mix3=Attention(int(number/2),int(number/2))
-#         self.mix4=Attention(int(number/2),int(number/2))
-#         self.conv2x1=nn.Conv3d(int(number/2),1,kernel_size=1)
-#         self.conv2x2=nn.Conv3d(int(number/2),1,kernel_size=1)
-#         self.conv2x3=nn.Conv3d(int(number/2),1,kernel_size=1)
-#         self.conv2x4=nn.Conv3d(int(number/2),1,kernel_size=1)
-#         self.final=nn.Sequential(
-#             nn.Conv3d(number*2, number*2, kernel_size=3, padding=1),
-#             nn.GroupNorm(num_groups=8, num_channels=number*2, eps=1e-01, affine=True),
-#             nn.PReLU(),
-#             nn.Conv3d(number*2, 1, kernel_size=1))
-        
 
-#         for m in self.modules():
-#             if isinstance(m,(nn.Conv3d,nn.ConvTranspose3d,nn.Linear)):
-#                 nn.init.xavier_normal_(m.weight, gain=1.0)
-#             elif isinstance(m,(nn.BatchNorm3d,nn.GroupNorm)):
-#                 nn.init.constant_(m.weight,1)
-#                 nn.init.constant_(m.bias,0)
-
-#     def forward(self,x):
-#         conv1=self.conv1(x)
-#         pool1=self.dropout(torch.cat([x,conv1],dim=1))
-#         pool1=self.maxpool(pool1)
-
-#         conv2=self.conv2(pool1)
-#         pool2=self.dropout(torch.cat([pool1,conv2],dim=1))
-#         pool2=self.maxpool(pool2)
-
-#         conv3=self.conv3(pool2)
-#         pool3=self.dropout(torch.cat([pool2,conv3],dim=1))
-#         pool3=self.maxpool(pool3)
-
-#         conv4=self.conv4(pool3)
-#         pool4=self.dropout(torch.cat([pool3,conv4],dim=1))
-#         pool4=self.maxpool(pool4)
-
-#         conv5=self.conv5(pool4)
-#         conv5=self.dropout(torch.cat([pool4,conv5],dim=1))
-
-#         up6=self.dropout(torch.cat([self.up6(conv5),conv4],dim=1))
-#         conv6=self.conv6(up6)
-#         conv6=self.dropout(torch.cat([up6,conv6],dim=1))
-
-#         up7=self.dropout(torch.cat([self.up7(conv6),conv3],dim=1))
-#         conv7=self.conv7(up7)       
-#         conv7=self.dropout(torch.cat([up7,conv7],dim=1))
-
-
-#         up8=self.dropout(torch.cat([self.up8(conv7),conv2],dim=1))
-#         conv8=self.conv8(up8)
-#         conv8=self.dropout(torch.cat([up8,conv8],dim=1))
-
-
-#         up9=self.dropout(torch.cat([self.up9(conv8),conv1],dim=1))
-#         conv9=self.conv9(up9)
-#         conv9=self.dropout(torch.cat([up9,conv9],dim=1))
-
-#         fs1=F.interpolate(self.featureScale1(conv9),x.size()[2:],mode='trilinear')
-#         fs2=F.interpolate(self.featureScale2(conv8),x.size()[2:],mode='trilinear')
-#         fs3=F.interpolate(self.featureScale3(conv7),x.size()[2:],mode='trilinear')
-#         fs4=F.interpolate(self.featureScale4(conv6),x.size()[2:],mode='trilinear')
-        
-#         fs1o=self.conv1x1(fs1)
-#         fs2o=self.conv1x2(fs2)
-#         fs3o=self.conv1x3(fs3)
-#         fs4o=self.conv1x4(fs4)
-        
-#         mix1,att1=self.mix1(fs1)
-#         mix2,att2=self.mix2(fs2)
-#         mix3,att3=self.mix3(fs3)
-#         mix4,att4=self.mix4(fs4)
-        
-#         mix_out1=self.conv2x1(mix1)
-#         mix_out2=self.conv2x2(mix2)
-#         mix_out3=self.conv2x3(mix3)
-#         mix_out4=self.conv2x4(mix4)
-#         out=torch.cat((mix1,mix2,mix3,mix4),dim=1)
-#         out=self.final(out)
-#         if self.phase=='train':
-#             return {'out':out,'as1':mix_out1,'as2':mix_out2,'as3':mix_out3,'as4':mix_out4,'s1':fs1o,'s2':fs2o,'s3':fs3o,'s4':fs4o}
-#         else:
-#             return out    
- 
 class model(nn.Module):
     def __init__(self,number=32,phase='train'):
         super().__init__()
@@ -834,7 +722,6 @@ for zz in tqdm(range(len(file))):
         if counts*unitVol<=5:
             imgs_mask_test[0,0,bbox[0]:bbox[-3],bbox[1]:bbox[-2],bbox[2]:bbox[-1]]=0
     np.save('./result/clahefu/'+str(zz)+'.npy',imgs_mask_test[0,0])
-    # np.save('./result/mask/'+str(zz)+'.npy',mm)
     
     dice=dice_coef(imgs_mask_test,mm)
     sens=evaluate(mm,imgs_mask_test[0,0],metric='SENS')

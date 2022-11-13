@@ -17,6 +17,10 @@ class myDataset(Dataset):
     def read(self):
         imageyuan=np.load(self.folder+'3Dran.npy').squeeze()
         maskyuan=np.load(self.folder+'3Dranm.npy').squeeze()
+        
+        # imageyuan=np.load(self.folder+'3Dclahe.npy').squeeze()
+        # maskyuan=np.load(self.folder+'3Dclahem.npy').squeeze()
+        
         rand_i = np.random.choice(range(len(imageyuan)),size=len(imageyuan),replace=False)
         num=len(imageyuan)*0.2
         if self.flag=='train':

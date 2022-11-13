@@ -1,4 +1,3 @@
-#%%
 import numpy as np
 import glob
 from tqdm import tqdm
@@ -28,23 +27,15 @@ AHD=[]
 from miseval import evaluate
 
 predict=[]
-file=glob.glob('./32fu/*')
-for kk in tqdm(range(len(file))):
+file=glob.glob('orignialData/*')
+for kk in range(len(file)):
 
-    a=np.load('./64fu/'+str(kk)+'.npy')
-    b=np.load('./32fu/'+str(kk)+'.npy')
-    c=np.load('./clahefu/'+str(kk)+'.npy')
-    
-    if a.shape[0]==a.shape[1]:
-        a=a[0,0]
-    if b.shape[0]==b.shape[1]:
-        b=b[0,0]
-    if c.shape[0]==c.shape[1]:
-        c=c[0,0]
-    
+    a=np.load('./result/'+'64-'+str(kk)+'.npy')
+    b=np.load('./result/'+'32-'+str(kk)+'.npy')
+    c=np.load('./result/'+'clahe-'+str(kk)+'.npy')
+
     add=np.zeros(a.shape)
     
-
     if np.all(a*b==0) and np.all(a*c==0) and np.all(c*b==0):
         predict.append(b)
         continue
@@ -160,49 +151,16 @@ for kk in tqdm(range(len(file))):
             add[bbox[0]:bbox[-3],bbox[1]:bbox[-2],bbox[2]:bbox[-1]]=all[bbox[0]:bbox[-3],bbox[1]:bbox[-2],bbox[2]:bbox[-1]]
         predict.append(add)
         continue
-    
 
-import SimpleITK as sitk
-import glob
-
-for i in tqdm(range(len(predict))):
-    mask=np.load('./mask/'+str(i)+'.npy')
+num=0
+for i in range(len(predict)):
     add=predict[i]
     add[add>=0.5]=1
     add[add<0.5]=0
-    dice=dice_coef(mask,add)
+    labels1=measure.label(add)
+    region1=measure.regionprops(labels1)
+    num+=len(region1)
+    print(len(region1))
+print(num/len(predict))
 
-    dicep.append(dice)
-    
-    np.save('./ensemble/'+str(i)+'.npy',add)   
-    niis=sitk.GetImageFromArray(add)
-    sitk.WriteImage(niis,'./3Dplot/ensemble/'+str(i)+'.nii.gz')
-    niim=sitk.GetImageFromArray(mask)
-    sitk.WriteImage(niim,'./3Dplot/mask/'+str(i)+'m.nii.gz')
-    
-    sens=evaluate(mask[0,0],add,metric='SENS')
-    spec=evaluate(mask[0,0],add,metric='SPEC')
-    prec=evaluate(mask[0,0],add,metric='PREC')
-    bacc=evaluate(mask[0,0],add,metric='BACC')
-    auc=evaluate(mask[0,0],add,metric='AUC')
-    kap=evaluate(mask[0,0],add,metric='KAP')
-    vs=evaluate(mask[0,0],add,metric='VS')
-    nmcc=evaluate(mask[0,0],add,metric='nMCC')
-    ahd=0
-    for iii in range(len(mask[0,0])):
-        ahd +=evaluate(mask[0,0,iii],add[iii],metric='AHD')
-    ahd=ahd/len(mask[0,0])
-    SENS.append(sens)
-    SPEC.append(spec)
-    PREC.append(prec)
-    BACC.append(bacc)
-    AUC.append(auc)
-    KAP.append(kap)
-    VS.append(vs)
-    NMCC.append(nmcc)
-    AHD.append(ahd)
-    
-print('\n\n\nAveragedDice:{}\nSensitivity:{}\nSpecificity:{}\nPrecision:{}\n\
-Banlanced ACC:{}\nAUC:{}\nKAP:{}\nVolumetric Similarity:{}\nNormalized Matthews Correlation Coefficient:{}\n\
-Averaged Hf:{}\n'.format(np.mean(dicep),np.mean(SENS),np.mean(SPEC),np.mean(PREC),np.mean(BACC),np.mean(AUC),np.mean(KAP),\
-            np.mean(VS),np.mean(NMCC),np.mean(AHD)))
+
